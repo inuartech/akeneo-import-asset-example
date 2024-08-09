@@ -1,0 +1,35 @@
+{
+    "license": "MIT",
+    "name": "inuartech/akeneo-import-assets",
+    "description": "A PHP script to import assets into Akeneo PIM from a CSV file containing asset URLs.",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Nei Santos",
+            "email": "nei@inuartech.com"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "symfony/dotenv": "^5.4",
+        "symfony/console": "^5.4",
+        "nyholm/psr7": "^1.8",
+        "league/csv": "^9.7",
+        "php-http/guzzle6-adapter": "^2.0",
+        "http-interop/http-factory-guzzle": "^1.0",
+        "akeneo/api-php-client": "^11.3"
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "keywords": [
+        "Akeneo",
+        "PIM",
+        "Asset Import",
+        "CSV"
+    ]
+}
