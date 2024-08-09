@@ -10,6 +10,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\SingleCommandApplication;
 use Symfony\Component\Dotenv\Dotenv;
@@ -17,10 +18,14 @@ use Symfony\Component\Dotenv\Dotenv;
 (new SingleCommandApplication())
     ->setName('Importing images')
     ->setVersion('1.0.0')
-    ->addArgument('max', InputArgument::OPTIONAL)
+    ->addArgument('family', InputArgument::REQUIRED)
+    ->addOption('locale', 'l', InputOption::VALUE_OPTIONAL, 'locale code', 'en_US')
     ->setCode(function (InputInterface $input, OutputInterface $output): int {
         // output arguments and options
         $output->writeln('Syncing Images');
+
+        $assetFamilyCode = $input->getArgument('family');
+        $locale = $input->getOption('locale');
 
         $dotenv = new Dotenv();
         $dotenv->load(__DIR__.'/.env');
@@ -50,16 +55,18 @@ use Symfony\Component\Dotenv\Dotenv;
             $imagePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $pathInfo['basename'];
 
             try {
-                $asset = $akeneoClient->getAssetManagerApi()->get('thumbnail', $assetCode);
+                $asset = $akeneoClient->getAssetManagerApi()->get($assetFamilyCode, $assetCode);
                 // asset exist already, do nothing
             } catch (NotFoundHttpException $e ) {
                 // lets create it
-                $akeneoClient->getAssetManagerApi()->upsert('thumbnail', $assetCode, [
+                $akeneoClient->getAssetManagerApi()->upsert($assetFamilyCode, $assetCode, [
                     'code' => $assetCode,
                     'values' => [
                         'label' => [[
-                            'locale' => 'en_US', 'channel' => null, 'data' => $assetTitle
+                            'locale' => $locale, 'channel' => null, 'data' => $assetTitle
                         ]],
+
+                        // update with your attributes below
                         'thumbnail_url' => [[
                                 'locale' => null, 'channel' => null, 'data' => $assetUrl
                         ]]
@@ -68,9 +75,10 @@ use Symfony\Component\Dotenv\Dotenv;
 
                 try {
                     $mediaFileCode = $akeneoClient->getAssetMediaFileApi()->create($imagePath);
-                    $akeneoClient->getAssetManagerApi()->upsert('thumbnail', $assetCode, [
+                    $akeneoClient->getAssetManagerApi()->upsert($assetFamilyCode, $assetCode, [
                         'code' => $assetCode,
                         'values' => [
+                            // update with your image field name
                             'thumbnail_image' => [[
                                 'locale' => null, 'channel' => null, 'data' => $mediaFileCode
                             ]]
